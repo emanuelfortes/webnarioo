@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Webinar ACEV: os cinco módulos do sistema após a migração para Next.js, e o destino de cada um dos 25 achados da auditoria.">
+<title>Módulos do Webinar ACEV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground: #eceff1;
+    --surface: #ffffff;
+    --surface-2: #f4f7f8;
+    --line: #d3dbde;
+    --line-soft: #e4eaec;
+    --ink: #131a1d;
+    --ink-2: #56646a;
+    --ink-3: #7d8b91;
+    --accent: #0e5f6b;
+    --accent-soft: #dceef0;
+
+    --alto: #ab2a12;
+    --alto-bg: #fbe9e4;
+    --medio: #8a5a06;
+    --medio-bg: #faf0dc;
+    --baixo: #4a5b62;
+    --baixo-bg: #e7ecee;
+    --bom: #46661c;
+    --bom-bg: #eaf1dc;
+
+    --shadow: 0 1px 2px rgba(19, 26, 29, .05), 0 8px 24px -18px rgba(19, 26, 29, .35);
+
+    --display: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
+    --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --mono: "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #10161a;
+      --surface: #171f24;
+      --surface-2: #1c262c;
+      --line: #2a353c;
+      --line-soft: #222c32;
+      --ink: #e3eaed;
+      --ink-2: #97a5ac;
+      --ink-3: #77868d;
+      --accent: #57c8d6;
+      --accent-soft: #14343a;
+
+      --alto: #ff9075;
+      --alto-bg: #381d15;
+      --medio: #e6b95e;
+      --medio-bg: #322710;
+      --baixo: #9dacb3;
+      --baixo-bg: #212b31;
+      --bom: #a9c46a;
+      --bom-bg: #232d16;
+
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px -20px rgba(0, 0, 0, .8);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #10161a;
+    --surface: #171f24;
+    --surface-2: #1c262c;
+    --line: #2a353c;
+    --line-soft: #222c32;
+    --ink: #e3eaed;
+    --ink-2: #97a5ac;
+    --ink-3: #77868d;
+    --accent: #57c8d6;
+    --accent-soft: #14343a;
+
+    --alto: #ff9075;
+    --alto-bg: #381d15;
+    --medio: #e6b95e;
+    --medio-bg: #322710;
+    --baixo: #9dacb3;
+    --baixo-bg: #212b31;
+    --bom: #a9c46a;
+    --bom-bg: #232d16;
+
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px -20px rgba(0, 0, 0, .8);
+  }
+
+  * { box-sizing: border-box; }
+  html { color-scheme: light dark; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.62;
+    margin: 0;
+    padding: 0 20px 100px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 900px; margin: 0 auto; }
+
+  /* ---------- header ---------- */
+
+  .masthead { padding: 68px 0 34px; border-bottom: 2px solid var(--ink); }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: .72rem; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+
+  h1 {
+    font-family: var(--display); font-weight: 800;
+    font-size: clamp(2.4rem, 6vw, 3.5rem);
+    line-height: 1.03; letter-spacing: -.025em;
+    text-wrap: balance; margin: 0 0 16px;
+  }
+
+  .standfirst {
+    font-size: 1.14rem; color: var(--ink-2);
+    max-width: 60ch; margin: 0 0 30px;
+  }
+
+  .meta {
+    display: flex; flex-wrap: wrap; gap: 8px 28px;
+    font-family: var(--mono); font-size: .74rem; color: var(--ink-3);
+  }
+  .meta b { color: var(--ink-2); font-weight: 500; }
+
+  /* ---------- sections ---------- */
+
+  section { padding-top: 56px; }
+
+  h2 {
+    font-family: var(--display); font-weight: 700;
+    font-size: 1.6rem; letter-spacing: -.015em;
+    text-wrap: balance; margin: 0 0 6px;
+  }
+
+  .sec-note { color: var(--ink-3); font-size: .95rem; margin: 0 0 24px; max-width: 64ch; }
+
+  h3 {
+    font-family: var(--mono); font-weight: 600;
+    font-size: .74rem; letter-spacing: .13em; text-transform: uppercase;
+    color: var(--ink-3); margin: 40px 0 14px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  h3::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+  p { margin: 0 0 14px; max-width: 68ch; }
+  p:last-child { margin-bottom: 0; }
+
+  code, .mono { font-family: var(--mono); font-size: .84em; }
+
+  code {
+    background: var(--surface-2); border: 1px solid var(--line-soft);
+    border-radius: 3px; padding: .1em .34em;
+    color: var(--ink); overflow-wrap: anywhere;
+  }
+
+  /* ---------- checks ---------- */
+
+  .checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+
+  .check {
+    background: var(--surface); border: 1px solid var(--line);
+    border-left: 3px solid var(--st); border-radius: 6px;
+    padding: 14px 16px; box-shadow: var(--shadow);
+  }
+  .check.pass { --st: var(--bom); }
+
+  .check .cmd { font-family: var(--mono); font-size: .74rem; color: var(--ink-3); margin-bottom: 8px; }
+  .check .verdict {
+    font-family: var(--display); font-weight: 700;
+    font-size: 1.05rem; color: var(--st); letter-spacing: -.01em;
+  }
+  .check .detail { font-size: .84rem; color: var(--ink-2); margin-top: 3px; line-height: 1.45; }
+
+  /* ---------- mapa de módulos ---------- */
+
+  .mapa-scroll { overflow-x: auto; padding-bottom: 6px; }
+  .mapa { min-width: 700px; }
+
+  .fila { display: flex; align-items: stretch; gap: 6px; }
+
+  .mod {
+    flex: 1; background: var(--surface);
+    border: 1px solid var(--line); border-top: 3px solid var(--accent);
+    border-radius: 6px 6px 0 0; padding: 13px 13px 15px;
+  }
+
+  .mod .n {
+    font-family: var(--mono); font-size: .64rem;
+    letter-spacing: .1em; color: var(--ink-3); text-transform: uppercase;
+  }
+  .mod .nome {
+    font-family: var(--display); font-weight: 700;
+    font-size: 1rem; letter-spacing: -.015em; margin: 3px 0 6px;
+  }
+  .mod .rota {
+    font-family: var(--mono); font-size: .7rem; color: var(--accent);
+    background: var(--accent-soft); border-radius: 3px;
+    padding: 2px 5px; display: inline-block;
+  }
+  .mod .faz { font-size: .8rem; line-height: 1.4; color: var(--ink-2); margin-top: 8px; }
+
+  .nucleo {
+    background: var(--surface-2); border: 1px solid var(--line); border-top: none;
+    border-radius: 0 0 6px 6px; padding: 13px 16px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .nucleo .rotulo {
+    font-family: var(--display); font-weight: 700; font-size: .95rem;
+  }
+  .nucleo .itens { font-family: var(--mono); font-size: .72rem; color: var(--ink-2); }
+
+  /* ---------- tabelas ---------- */
+
+  .tabela-scroll { overflow-x: auto; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+
+  th {
+    font-family: var(--mono); font-weight: 600;
+    font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-3); text-align: left;
+    padding: 8px 10px; border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 11px 10px; border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+  }
+
+  td.mono-cell { font-family: var(--mono); font-size: .76rem; color: var(--ink-2); white-space: nowrap; }
+  td b { font-weight: 600; }
+
+  /* ---------- pills de status ---------- */
+
+  .pill {
+    font-family: var(--mono); font-size: .68rem; font-weight: 600;
+    letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 100px;
+    background: var(--pb); color: var(--pc);
+    display: inline-block; white-space: nowrap;
+  }
+  .pill.ok { --pb: var(--bom-bg); --pc: var(--bom); }
+  .pill.parcial { --pb: var(--medio-bg); --pc: var(--medio); }
+  .pill.aberto { --pb: var(--alto-bg); --pc: var(--alto); }
+  .pill.sev-a { --pb: var(--alto-bg); --pc: var(--alto); }
+  .pill.sev-m { --pb: var(--medio-bg); --pc: var(--medio); }
+  .pill.sev-b { --pb: var(--baixo-bg); --pc: var(--baixo); }
+
+  .tally { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+  .tally .pill { font-size: .74rem; padding: 5px 11px; }
+
+  /* ---------- antes/depois ---------- */
+
+  .troca {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px;
+    align-items: center; margin-bottom: 10px;
+  }
+
+  .lado {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 6px; padding: 16px 18px;
+  }
+  .lado h4 {
+    font-family: var(--mono); font-size: .68rem; font-weight: 600;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-3); margin: 0 0 10px;
+  }
+  .lado ul { margin: 0; padding-left: 18px; }
+  .lado li { font-size: .88rem; margin-bottom: 6px; line-height: 1.45; }
+  .lado li:last-child { margin-bottom: 0; }
+  .lado.antes li::marker { color: var(--ink-3); }
+  .lado.depois li::marker { color: var(--bom); }
+
+  .seta { font-family: var(--mono); font-size: 1.3rem; color: var(--accent); }
+
+  /* ---------- destaque ---------- */
+
+  .destaque {
+    background: var(--accent-soft); border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px; padding: 20px 24px;
+  }
+  .destaque p { max-width: none; }
+
+  .aberto-card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-left: 4px solid var(--medio); border-radius: 6px;
+    padding: 18px 20px; margin-bottom: 12px; box-shadow: var(--shadow);
+  }
+  .aberto-card h4 {
+    font-family: var(--display); font-weight: 700; font-size: 1.08rem;
+    letter-spacing: -.015em; margin: 0 0 7px;
+  }
+  .aberto-card p { font-size: .94rem; max-width: none; }
+
+  .closing {
+    margin-top: 52px; padding-top: 22px; border-top: 2px solid var(--ink);
+    font-size: .86rem; color: var(--ink-3);
+    font-family: var(--mono); line-height: 1.6;
+  }
+
+  a { color: var(--accent); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  @media (max-width: 720px) {
+    .troca { grid-template-columns: 1fr; }
+    .seta { transform: rotate(90deg); text-align: center; }
+  }
+
+  @media (max-width: 620px) {
+    body { font-size: 16px; padding: 0 16px 70px; }
+    .masthead { padding-top: 44px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Arquitetura e auditoria · 28 ago 2026</p>
+    <h1>Módulos do Webinar ACEV</h1>
+    <p class="standfirst">
+      O sistema migrado para Next.js e dividido em cinco módulos de produto — um por etapa do funil —
+      sobre um núcleo compartilhado. Dos 25 achados da auditoria, 22 foram fechados no caminho.
+    </p>
+    <div class="meta">
+      <span><b>branch</b> migracao-nextjs</span>
+      <span><b>stack</b> Next 16 · React 19 · Supabase</span>
+      <span><b>código</b> 60 arquivos · 3.252 linhas</span>
+      <span><b>schema</b> 202 linhas de SQL versionado</span>
+    </div>
+  </header>
+
+  <!-- ===================== MÓDULOS ===================== -->
+  <section>
+    <h2>Os cinco módulos</h2>
+    <p class="sec-note">
+      A divisão não é técnica, é de produto: cada módulo é uma etapa do funil, e cada etapa é uma
+      rota. Por isso a ordem importa — ela é a jornada do lead, da landing até a agenda.
+    </p>
+
+    <div class="mapa-scroll">
+      <div class="mapa">
+        <div class="fila">
+          <div class="mod">
+            <div class="n">Etapa 1</div>
+            <div class="nome">Captação</div>
+            <span class="rota">/</span>
+            <p class="faz">Landing renderizada no servidor, cadastro validado e consentimento de LGPD.</p>
+          </div>
+          <div class="mod">
+            <div class="n">Etapa 2</div>
+            <div class="nome">Sala</div>
+            <span class="rota">/sala</span>
+            <p class="faz">Vídeo sincronizado pelo relógio, chat ao vivo, presença e revelação da oferta.</p>
+          </div>
+          <div class="mod">
+            <div class="n">Etapa 3</div>
+            <div class="nome">Aplicação</div>
+            <span class="rota">/aplicacao</span>
+            <p class="faz">Questionário de nove perguntas em formato de conversa, e o agendamento.</p>
+          </div>
+          <div class="mod">
+            <div class="n">Etapa 4</div>
+            <div class="nome">Métricas</div>
+            <span class="rota">/dashboard</span>
+            <p class="faz">Funil completo, retenção por minutagem e distribuição das respostas.</p>
+          </div>
+          <div class="mod">
+            <div class="n">Etapa 5</div>
+            <div class="nome">Administração</div>
+            <span class="rota">/admin</span>
+            <p class="faz">Configuração do webinar, base de leads e moderação do chat ao vivo.</p>
+          </div>
+        </div>
+
+        <div class="nucleo">
+          <span class="rotulo">Núcleo</span>
+          <span class="itens">
+            auth · db/server · db/browser · identity · config · types · format · csv
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <h3>O que cada um pesa</h3>
+
+    <div class="tabela-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Módulo</th>
+            <th>Rota</th>
+            <th>Arquivos</th>
+            <th>Linhas</th>
+            <th>Do que é dono</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>Captação</b></td>
+            <td class="mono-cell">/</td>
+            <td class="mono-cell">3</td>
+            <td class="mono-cell">184</td>
+            <td>Tabela <code>leads</code>, cálculo do horário da sessão, emissão da identidade.</td>
+          </tr>
+          <tr>
+            <td><b>Sala</b></td>
+            <td class="mono-cell">/sala</td>
+            <td class="mono-cell">13</td>
+            <td class="mono-cell">833</td>
+            <td>Tabelas <code>messages</code> e <code>events</code>, relógio da sessão, realtime.</td>
+          </tr>
+          <tr>
+            <td><b>Aplicação</b></td>
+            <td class="mono-cell">/aplicacao</td>
+            <td class="mono-cell">8</td>
+            <td class="mono-cell">384</td>
+            <td>Tabela <code>applications</code> e o roteiro das perguntas.</td>
+          </tr>
+          <tr>
+            <td><b>Métricas</b></td>
+            <td class="mono-cell">/dashboard</td>
+            <td class="mono-cell">9</td>
+            <td class="mono-cell">287</td>
+            <td>Função <code>dashboard_stats</code> e a leitura agregada do funil.</td>
+          </tr>
+          <tr>
+            <td><b>Administração</b></td>
+            <td class="mono-cell">/admin</td>
+            <td class="mono-cell">8</td>
+            <td class="mono-cell">702</td>
+            <td>Tabela <code>webinar_config</code>, exportações e moderação.</td>
+          </tr>
+          <tr>
+            <td><b>Núcleo</b></td>
+            <td class="mono-cell">—</td>
+            <td class="mono-cell">11</td>
+            <td class="mono-cell">495</td>
+            <td>Sessão do admin, clientes de banco, identidade do visitante, tipos.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Todo módulo tem o mesmo formato</h3>
+    <p>
+      Isso é deliberado: você nunca precisa procurar. Se quer saber o que a Sala grava no banco, é
+      <code>modules/sala/actions.ts</code> — a mesma posição que <code>modules/captacao/actions.ts</code>
+      ocupa na Captação.
+    </p>
+
+    <div class="tabela-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Arquivo</th>
+            <th>Roda onde</th>
+            <th>Papel</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono-cell">actions.ts</td>
+            <td><b>Servidor</b></td>
+            <td>Mutações. Marcado com <code>'use server'</code>.</td>
+          </tr>
+          <tr>
+            <td class="mono-cell">queries.ts</td>
+            <td><b>Servidor</b></td>
+            <td>Leituras. Marcado com <code>import 'server-only'</code>.</td>
+          </tr>
+          <tr>
+            <td class="mono-cell">components/</td>
+            <td>Navegador</td>
+            <td>Interface.</td>
+          </tr>
+          <tr>
+            <td class="mono-cell">hooks/</td>
+            <td>Navegador</td>
+            <td>Estado de cliente. Só a Sala precisa.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:16px">
+      As rotas em <code>src/app/</code> não têm lógica: elas checam autorização, buscam dados pelas
+      <code>queries</code> do módulo e montam os componentes. São oito arquivos finos, de 367 linhas
+      no total.
+    </p>
+  </section>
+
+  <!-- ===================== FRONTEIRA ===================== -->
+  <section>
+    <h2>A fronteira que organiza tudo</h2>
+    <p class="sec-note">
+      Uma única decisão explica o desenho acima e fecha o achado mais grave da auditoria.
+    </p>
+
+    <div class="destaque">
+      <p><b>O navegador não escreve no banco.</b></p>
+      <p>
+        <code>core/db/server.ts</code> carrega a <code>service_role</code> key e começa com
+        <code>import 'server-only'</code>. Se qualquer componente de cliente importar esse módulo, o
+        <b>build falha</b> — a garantia é mecânica, não depende de ninguém lembrar.
+      </p>
+      <p>
+        <code>core/db/browser.ts</code> carrega a <code>anon</code> key, cujo único poder no RLS é
+        <code>select</code> em <code>messages</code>, o mínimo para o realtime do chat funcionar.
+      </p>
+      <p style="margin-bottom:0">
+        E toda ação de <code>/admin</code> e <code>/dashboard</code> passa por
+        <code>exigirAdmin()</code>, que valida um cookie httpOnly assinado. Não é mais condicional de
+        renderização em React: chamar a API direto não contorna nada.
+      </p>
+    </div>
+
+    <h3>Por que o Supabase continua no projeto</h3>
+    <p>
+      Por duas coisas, e só: <b>Realtime</b> (o chat) e <b>Presence</b> (o contador de espectadores).
+      Função serverless não segura conexão aberta pelos 75 minutos de uma sessão, e Postgres puro não
+      faz broadcast. O banco em si já poderia ser trocado sem tocar em nenhum módulo — todo o acesso
+      está concentrado em <code>queries.ts</code> e <code>actions.ts</code>. É esse isolamento que
+      deixa a porta aberta para o Neon numa etapa futura, se você quiser.
+    </p>
+  </section>
+
+  <!-- ===================== ANTES/DEPOIS ===================== -->
+  <section>
+    <h2>O que mudou</h2>
+
+    <div class="troca">
+      <div class="lado antes">
+        <h4>Antes</h4>
+        <ul>
+          <li>SPA Vite, tudo no navegador</li>
+          <li>Anon key escrevendo direto no Postgres</li>
+          <li>Login como condicional de render</li>
+          <li>Schema e RLS fora do repositório</li>
+          <li>Landing carregando em branco</li>
+          <li>Identidade do lead inventada no cliente</li>
+        </ul>
+      </div>
+      <div class="seta">→</div>
+      <div class="lado depois">
+        <h4>Depois</h4>
+        <ul>
+          <li>Next.js App Router, servidor + cliente</li>
+          <li>Service role só no servidor</li>
+          <li>Cookie httpOnly assinado, verificado</li>
+          <li><code>supabase/schema.sql</code> versionado</li>
+          <li>Landing renderizada no servidor</li>
+          <li>Identidade emitida pelo servidor</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== VERIFICAÇÕES ===================== -->
+  <section>
+    <h2>Verificações</h2>
+    <p class="sec-note">Rodado com as dependências reinstaladas do zero. Os quatro passam.</p>
+
+    <div class="checks">
+      <div class="check pass">
+        <div class="cmd">npm run build</div>
+        <div class="verdict">Passa</div>
+        <div class="detail">7 rotas compiladas, 6,5 s.</div>
+      </div>
+      <div class="check pass">
+        <div class="cmd">npm run typecheck</div>
+        <div class="verdict">Passa</div>
+        <div class="detail">Strict, sem <code>any</code>.</div>
+      </div>
+      <div class="check pass">
+        <div class="cmd">npm run lint</div>
+        <div class="verdict">Passa</div>
+        <div class="detail">Antes o comando nem existia.</div>
+      </div>
+      <div class="check pass">
+        <div class="cmd">npm audit</div>
+        <div class="verdict">0 alertas</div>
+        <div class="detail">Eram 6, sendo 2 altos.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ACHADOS ===================== -->
+  <section>
+    <h2>Destino dos 25 achados</h2>
+    <p class="sec-note">
+      Cada linha da auditoria original e o que aconteceu com ela nesta migração.
+    </p>
+
+    <div class="tally">
+      <span class="pill ok">22 corrigidos</span>
+      <span class="pill parcial">1 parcial</span>
+      <span class="pill aberto">2 abertos</span>
+    </div>
+
+    <div class="tabela-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Achado</th>
+            <th>Status</th>
+            <th>O que foi feito</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill sev-a">A1</span></td>
+            <td><b>RLS fora do repositório</b></td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>Schema e policies versionados em <code>supabase/schema.sql</code>; escrita movida para o servidor.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-a">A2</span></td>
+            <td><b><code>offer_click</code> nunca disparava</b></td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>Registrado nos dois CTAs, aguardando a gravação antes de navegar.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-a">A3</span></td>
+            <td><b><code>wb_lead</code> não persistia</b></td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>Identidade emitida pelo servidor em cookie httpOnly; sem cadastro, sem evento.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-a">A4</span></td>
+            <td><b>Coleta sem base de LGPD</b></td>
+            <td><span class="pill parcial">Parcial</span></td>
+            <td>Consentimento no formulário, gravado em <code>consent_at</code>, e página de política. Falta revisão jurídica.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-m">M1</span></td>
+            <td>Enxurrada de mensagens para quem entra atrasado</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>O que já passou é marcado na montagem, antes do primeiro tick.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-m">M2</span></td>
+            <td><code>offer_view</code> inflado por chegada tardia</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>Quem abre com a sessão encerrada não gera <code>room_enter</code> nem <code>offer_view</code>.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-m">M3</span></td>
+            <td>Homônimos invisíveis no chat</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>O eco passou a ser identificado por <code>lead_id</code>, não por nome.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-m">M4</span></td>
+            <td>Moderação não chegava na sala</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>Assinatura de <code>DELETE</code> no realtime, na sala e no painel.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-m">M5</span></td>
+            <td>Injeção de fórmula no CSV</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>Células iniciadas por <code>= + - @</code> recebem apóstrofo.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-m">M6</span></td>
+            <td>Comando de lint inexistente</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>ESLint instalado e configurado; roda limpo.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-m">M7</span></td>
+            <td>6 vulnerabilidades nas dependências</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>Stack renovada; <code>npm audit</code> agora acusa zero.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-m">M8</span></td>
+            <td><b>Nenhum teste, nenhum CI</b></td>
+            <td><span class="pill aberto">Aberto</span></td>
+            <td>Não foi endereçado nesta etapa.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-m">M9</span></td>
+            <td>Landing carregando em branco</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>Server Component: o HTML chega pronto na primeira resposta.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-m">M10</span></td>
+            <td>Variável ausente derrubava o app</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td><code>core/env.ts</code> valida e diz qual variável falta.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-m">M11</span></td>
+            <td>Formulários e abas inacessíveis</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td><code>htmlFor</code> em todos os campos; abas viraram <code>button</code> com <code>role="tab"</code>.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-b">B1</span></td>
+            <td>Artefatos de build versionados</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>Removidos; <code>.gitignore</code> cobre <code>*.tsbuildinfo</code>.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-b">B2</span></td>
+            <td>Nenhum README</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>Setup, variáveis, comandos e arquitetura documentados.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-b">B3</span></td>
+            <td><b><code>/foto.jpg</code> não existe</b></td>
+            <td><span class="pill aberto">Aberto</span></td>
+            <td>Pasta <code>public/</code> criada com instrução — o arquivo é seu.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-b">B4</span></td>
+            <td>Sem meta description nem Open Graph</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>Metadata API no layout; rotas internas marcadas <code>noindex</code>.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-b">B5</span></td>
+            <td><code>?s=</code> sem validação</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>Validado no servidor, com redirect; intervalo lido da config antes do cálculo.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-b">B6</span></td>
+            <td>Listas truncando em silêncio</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>Total real exibido e aviso quando há mais do que o limite.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-b">B7</span></td>
+            <td>Aplicação sem vínculo com lead</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>Colunas <code>lead_id</code> e <code>session_at</code> gravadas e exibidas.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-b">B8</span></td>
+            <td>Sem cabeçalhos de segurança</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td><code>X-Frame-Options</code>, <code>nosniff</code> e <code>Referrer-Policy</code> no <code>next.config.mjs</code>.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-b">B9</span></td>
+            <td>Links externos sem <code>noreferrer</code></td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td><code>rel</code> completo, e link interno agora navega pelo router.</td>
+          </tr>
+          <tr>
+            <td><span class="pill sev-b">B10</span></td>
+            <td><code>randomUUID</code> exigia contexto seguro</td>
+            <td><span class="pill ok">Corrigido</span></td>
+            <td>Os UUIDs passaram a vir do Postgres (<code>gen_random_uuid</code>).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== ABERTOS ===================== -->
+  <section>
+    <h2>O que ficou em aberto</h2>
+    <p class="sec-note">Três itens, e os motivos são diferentes em cada caso.</p>
+
+    <div class="aberto-card">
+      <h4>Testes e CI — o mais importante da lista</h4>
+      <p>
+        Continua valendo o que a auditoria dizia: a lógica central deste sistema é temporal — relógio
+        da sessão, sincronia do vídeo, marcos de retenção, corte das mensagens programadas — e é
+        exatamente o tipo de código que não falha em desenvolvimento e falha em produção, com a sala
+        cheia. Vários dos bugs corrigidos aqui (A2, A3, M1) morreriam num teste de dez linhas.
+      </p>
+    </div>
+
+    <div class="aberto-card">
+      <h4>Revisão jurídica da política de privacidade</h4>
+      <p>
+        A página <code>/privacidade</code> descreve com precisão o que o sistema realmente coleta —
+        foi escrita a partir do código, não de um modelo. Mas faltam a razão social, o CNPJ e o
+        e-mail do encarregado, que só você tem, e uma revisão de quem entende do assunto.
+      </p>
+    </div>
+
+    <div class="aberto-card">
+      <h4>A foto do bloco de autoridade</h4>
+      <p>
+        <code>public/foto.jpg</code> precisa existir. É um arquivo seu, não tinha como eu criar.
+      </p>
+    </div>
+  </section>
+
+  <p class="closing">
+    Migração feita na branch migracao-nextjs, sem commits — a main segue intacta em 4ee261b.
+    Build, typecheck, lint e npm audit executados localmente, todos limpos. O banco não foi tocado:
+    supabase/schema.sql precisa ser aplicado no seu projeto do Supabase antes do primeiro uso.
+  </p>
+
+</div>
+</body>
+</html>

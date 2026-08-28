@@ -1,0 +1,3 @@
+Coloque aqui foto.jpg (52x52 ou maior, quadrada) — é a imagem do bloco de
+autoridade da landing page. B3 da auditoria: o arquivo era referenciado mas
+nunca existiu no projeto.
