@@ -13,3 +13,6 @@ next-env.d.ts
 key.txt
 keys.txt
 *.key
+
+# Cofre local de credenciais — nunca versionar
+SEGREDOS.local.md
