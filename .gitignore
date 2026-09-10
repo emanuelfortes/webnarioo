@@ -8,3 +8,8 @@ dist
 *.tsbuildinfo
 next-env.d.ts
 .vercel
+
+# Nunca versionar chaves soltas
+key.txt
+keys.txt
+*.key

@@ -41,7 +41,7 @@ export function RoomClient({ sessionAt, cfg, eu, mensagensIniciais }: RoomClient
   const { phase, elapsedSec } = useSessionClock(sessionAt, cfg.duration_sec);
   const viewers = usePresence(sessionAt, chaveDePresenca, eu.name);
   const { track, trackMarcos } = useEventTracking(sessionAt, eu.leadId !== null);
-  const chat = useChatMessages(sessionAt, mensagensIniciais, { meuLeadId: eu.leadId });
+  const chat = useChatMessages(sessionAt, mensagensIniciais);
 
   // O overlay tem duas origens: a fase da sessão e o portão de reprodução do
   // vídeo. Só a segunda é estado — a primeira é derivada, para não sincronizar

@@ -2,29 +2,47 @@
 
 import { db } from '@/core/db/server';
 import { visitante } from '@/core/identity';
-import type { EventType } from '@/core/types';
+import type { EventType, MessageRow } from '@/core/types';
 
 /** Violação de unicidade no Postgres — o evento já tinha sido contado. */
 const DUPLICADO = '23505';
 
 /**
- * Envia mensagem no chat.
+ * Envia mensagem no chat e devolve a linha gravada.
  *
  * O nome e a identidade vêm do cookie no servidor, nunca do corpo da
  * requisição: assim ninguém escreve no chat se passando por outra pessoa.
+ *
+ * Devolver a linha permite que o autor veja a própria mensagem na hora, sem
+ * depender do eco do realtime — que pode não chegar se a publicação do
+ * Supabase não estiver configurada.
  */
-export async function enviarMensagem(sessionAt: number, texto: string): Promise<void> {
+export async function enviarMensagem(
+  sessionAt: number,
+  texto: string,
+): Promise<MessageRow | null> {
   const eu = await visitante();
   const limpo = texto.trim().slice(0, 500);
-  if (!limpo || !Number.isFinite(sessionAt)) return;
+  if (!limpo || !Number.isFinite(sessionAt)) return null;
 
-  await db().from('messages').insert({
-    session_at: sessionAt,
-    lead_id: eu.leadId,
-    name: eu.name,
-    text: limpo,
-    is_host: false,
-  });
+  const { data, error } = await db()
+    .from('messages')
+    .insert({
+      session_at: sessionAt,
+      lead_id: eu.leadId,
+      name: eu.name,
+      text: limpo,
+      is_host: false,
+    })
+    .select('*')
+    .single();
+
+  if (error) {
+    console.error('[sala] falha ao enviar mensagem', error.message);
+    return null;
+  }
+
+  return data as MessageRow;
 }
 
 /**

@@ -5,20 +5,18 @@ import { realtime } from '@/core/db/browser';
 import type { MessageRow } from '@/core/types';
 import { enviarMensagem } from '../actions';
 
-interface Opcoes {
-  /** Identidade de quem está na sala, para reconhecer o eco da própria mensagem. */
-  meuLeadId: string | null;
-}
-
-export function useChatMessages(
-  sessionAt: number,
-  iniciais: MessageRow[],
-  { meuLeadId }: Opcoes,
-) {
+export function useChatMessages(sessionAt: number, iniciais: MessageRow[]) {
   const [messages, setMessages] = useState<MessageRow[]>(iniciais);
 
+  /**
+   * Acrescenta ao fim, ignorando o que já está na lista.
+   *
+   * A ordem é a de chegada, não a de id: as mensagens programadas do
+   * apresentador entram com id negativo e precisam aparecer no instante em que
+   * disparam, não no topo.
+   */
   const adicionarLocal = useCallback((m: MessageRow) => {
-    setMessages((prev) => [...prev, m]);
+    setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
   }, []);
 
   useEffect(() => {
@@ -33,15 +31,9 @@ export function useChatMessages(
           filter: 'session_at=eq.' + sessionAt,
         },
         (payload) => {
-          const nova = payload.new as MessageRow;
-
-          // M3 da auditoria: o eco era identificado por nome. Como o nome padrão
-          // de quem entra sem cadastro é "Visitante", todos os visitantes ficavam
-          // mutuamente invisíveis — e homônimos reais também. Agora compara a
-          // identidade, que é única.
-          if (meuLeadId && nova.lead_id === meuLeadId && !nova.is_host) return;
-
-          setMessages((prev) => (prev.some((m) => m.id === nova.id) ? prev : [...prev, nova]));
+          // A própria mensagem do autor já foi inserida no envio, com o id
+          // devolvido pelo servidor. O eco cai na deduplicação por id.
+          adicionarLocal(payload.new as MessageRow);
         },
       )
       .on(
@@ -63,13 +55,21 @@ export function useChatMessages(
     return () => {
       realtime.removeChannel(canal);
     };
-  }, [sessionAt, meuLeadId]);
+  }, [sessionAt, adicionarLocal]);
 
+  /**
+   * Envia e mostra na hora, com a linha que o servidor gravou.
+   *
+   * Antes, o autor nunca via a própria mensagem: o handler de realtime
+   * descartava o eco por `lead_id` esperando uma inserção otimista que não
+   * existia em lugar nenhum.
+   */
   const enviar = useCallback(
     async (texto: string) => {
-      await enviarMensagem(sessionAt, texto);
+      const gravada = await enviarMensagem(sessionAt, texto);
+      if (gravada) adicionarLocal(gravada);
     },
-    [sessionAt],
+    [sessionAt, adicionarLocal],
   );
 
   return { messages, adicionarLocal, enviar };

@@ -108,6 +108,23 @@ create policy "anon le mensagens"
   to anon, authenticated
   using (true);
 
+-- --- Privilégios de tabela ---------------------------------------------------
+-- A policy do RLS sozinha não basta: o Postgres exige TAMBÉM o grant de tabela.
+-- Explicitar os dois aqui deixa o schema independente da opção "Automatically
+-- expose new tables" do painel do Supabase — com ela ligada ou desligada, o
+-- resultado é o mesmo, e é este.
+--
+-- A service_role não é afetada por nada abaixo: ela continua com acesso total.
+
+revoke all on public.webinar_config from anon, authenticated;
+revoke all on public.leads          from anon, authenticated;
+revoke all on public.messages       from anon, authenticated;
+revoke all on public.applications   from anon, authenticated;
+revoke all on public.events         from anon, authenticated;
+
+grant usage on schema public to anon, authenticated;
+grant select on public.messages to anon, authenticated;
+
 -- --- Métricas do dashboard ---------------------------------------------------
 
 -- Distribuição de respostas da aplicação, por coluna.
