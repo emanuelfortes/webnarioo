@@ -30,11 +30,20 @@ git push leonardo main    # sincroniza o espelho do Leonardo
 
 ## Máquina nova
 
+Clone **o seu** repositório, não o do Leonardo: é o seu que a Vercel observa. Um
+commit empurrado só para o espelho não dispara deploy nenhum, e o site fica parado
+sem dar nenhum sinal do motivo.
+
 ```bash
 git clone https://github.com/emanuelfortes/webnarioo.git
 cd webnarioo
+git remote add leonardo https://github.com/gurgelleonardo784-jpg/webnario.git
 npm install
 ```
+
+A terceira linha recria o segundo remote, para você continuar conseguindo atualizar
+o espelho com `git push leonardo main`. Sem ela, a máquina nova só conhece o seu
+repositório e o do Leonardo vai ficando para trás em silêncio.
 
 Agora as variáveis. **Não copie na mão** — puxe da Vercel, que é a fonte da verdade:
 
