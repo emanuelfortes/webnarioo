@@ -1,7 +1,22 @@
 export interface ScheduledMessage {
+  /** Segundo do vídeo em que a mensagem entra no chat. */
   at: number;
   name: string;
   text: string;
+  /**
+   * `true` renderiza como apresentador (destaque laranja); ausente ou `false`
+   * renderiza como um participante qualquer.
+   *
+   * Essa distinção é o ponto da funcionalidade: uma sala em que toda fala vem
+   * do palco não passa a impressão de que há outras pessoas assistindo.
+   */
+  host?: boolean;
+}
+
+/** Ponto da curva de espectadores: no segundo `at`, havia `n` pessoas. */
+export interface ViewerPoint {
+  at: number;
+  n: number;
 }
 
 export interface WebinarConfig {
@@ -18,6 +33,15 @@ export interface WebinarConfig {
   cta_url: string;
   booking_url: string;
   scheduled_messages: ScheduledMessage[];
+  /** Copy da landing de captação. */
+  landing_subtitle: string;
+  author_name: string;
+  author_bio: string;
+  register_cta_label: string;
+  consent_text: string;
+  footer_text: string;
+  /** Curva de espectadores exibidos, somada à presença real. */
+  viewers_curve: ViewerPoint[];
 }
 
 export interface Lead {

@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "gerar-senha": "node scripts/gerar-senha.mjs",
-    "verificar": "node scripts/verificar-supabase.mjs"
+    "verificar": "node scripts/verificar-supabase.mjs",
+    "test": "node --test src/**/*.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
@@ -30,5 +31,6 @@
     "postcss": "^8.5.26",
     "tailwindcss": "^3.4.19",
     "typescript": "^5.9.3"
-  }
+  },
+  "type": "module"
 }

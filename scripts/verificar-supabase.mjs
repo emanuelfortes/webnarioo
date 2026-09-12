@@ -218,18 +218,42 @@ secao('Realtime (o teste que mais falha)');
 
 const canal = navegador.channel('verificacao_' + Date.now());
 
-const recebida = new Promise((resolve) => {
-  canal.on(
-    'postgres_changes',
-    {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'messages',
-      filter: 'session_at=eq.' + SESSAO_TESTE,
-    },
-    () => resolve(true),
-  );
-});
+let recebeuEvento = false;
+
+canal.on(
+  'postgres_changes',
+  {
+    event: 'INSERT',
+    schema: 'public',
+    table: 'messages',
+    filter: 'session_at=eq.' + SESSAO_TESTE,
+  },
+  () => {
+    recebeuEvento = true;
+  },
+);
+
+/** Espera o evento chegar, desistindo depois de `ms`. */
+async function esperarEvento(ms) {
+  const limite = Date.now() + ms;
+  while (Date.now() < limite && !recebeuEvento) {
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  return recebeuEvento;
+}
+
+async function inserirMensagemDeTeste() {
+  return servidor
+    .from('messages')
+    .insert({
+      session_at: SESSAO_TESTE,
+      name: 'verificacao',
+      text: 'teste automático de realtime',
+      is_host: false,
+    })
+    .select('id')
+    .single();
+}
 
 const inscrito = await new Promise((resolve) => {
   const limite = setTimeout(() => resolve(false), 15000);
@@ -255,36 +279,33 @@ if (!inscrito) {
 } else {
   ok('canal aberto');
 
-  const { data: inserida, error: erroInsert } = await servidor
-    .from('messages')
-    .insert({
-      session_at: SESSAO_TESTE,
-      name: 'verificacao',
-      text: 'teste automático de realtime',
-      is_host: false,
-    })
-    .select('id')
-    .single();
+  const { data: inserida, error: erroInsert } = await inserirMensagemDeTeste();
 
   if (erroInsert) {
     falhou(`não consegui inserir a mensagem de teste: ${erroInsert.message}`);
   } else {
     idTeste = inserida.id;
 
-    // 30s, não 12: na primeiríssima assinatura de um projeto novo o Realtime
-    // precisa inicializar a replicação, e o primeiro evento demora. Timeout
-    // curto aqui vira falso negativo justo no cenário mais comum — alguém
-    // acabando de criar o projeto.
-    const chegou = await Promise.race([
-      recebida,
-      new Promise((r) => setTimeout(() => r(false), 30000)),
-    ]);
+    // O Realtime esfria quando o projeto fica dias parado, e a primeira
+    // assinatura depois disso demora a começar a transmitir. Acusar falha na
+    // primeira tentativa manda a pessoa perseguir um problema que não existe —
+    // já aconteceu. Uma segunda tentativa separa "frio" de "quebrado".
+    let chegou = await esperarEvento(20000);
+
+    if (!chegou) {
+      aviso(
+        'nada em 20s — o Realtime costuma estar frio quando o projeto fica parado',
+        'tentando mais uma vez',
+      );
+      const { error: erroSegundo } = await inserirMensagemDeTeste();
+      if (!erroSegundo) chegou = await esperarEvento(25000);
+    }
 
     if (chegou) {
       ok('a mensagem voltou pelo canal', 'o chat ao vivo vai funcionar');
     } else {
       falhou(
-        'a mensagem NÃO voltou pelo canal — o chat só atualizaria com F5',
+        'a mensagem NÃO voltou pelo canal em duas tentativas — o chat só atualizaria com F5',
         'rode no SQL Editor: alter publication supabase_realtime add table public.messages;',
       );
     }

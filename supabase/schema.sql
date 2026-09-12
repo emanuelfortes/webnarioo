@@ -27,7 +27,21 @@ create table if not exists public.webinar_config (
   cta_label          text    not null default 'QUERO IMPLEMENTAR',
   cta_url            text    not null default '/aplicacao',
   booking_url        text    not null default '',
+  -- [{"at": segundos, "name": "quem", "text": "...", "host": false}]
   scheduled_messages jsonb   not null default '[]'::jsonb,
+
+  -- Copy da landing de captação. Editável em /admin.
+  landing_subtitle   text    not null default 'Encha a agenda de consultas do seu escritório com clientes vindos do Google, sem depender de indicação e sem risco com a OAB.',
+  author_name        text    not null default 'ACEV',
+  author_bio         text    not null default 'Especialistas em captação de clientes pelo Google para escritórios de advocacia: Ads, SEO e presença local',
+  register_cta_label text    not null default '🔴 Garantir minha vaga na próxima sessão',
+  consent_text       text    not null default 'Autorizo a ACEV a usar meus dados para me dar acesso a esta sessão e entrar em contato sobre os serviços apresentados. Posso pedir a exclusão a qualquer momento.',
+  footer_text        text    not null default 'ACEV · Todos os direitos reservados',
+
+  -- Curva de espectadores: [{"at": segundos, "n": pessoas}]. Interpolada entre
+  -- os pontos e somada à presença real. Vazia = só a presença real.
+  viewers_curve      jsonb   not null default '[]'::jsonb,
+
   constraint webinar_config_singleton check (id = 1)
 );
 

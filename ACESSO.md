@@ -144,10 +144,29 @@ continua com o valor velho.
 | --- | --- |
 | `npm run dev` | servidor de desenvolvimento |
 | `npm run verificar` | testa se o Supabase está 100% configurado |
+| `npm test` | roda os testes da lógica de tempo e da curva de espectadores |
 | `npm run gerar-senha -- "senha"` | gera o `ADMIN_PASSWORD_HASH` |
 | `npm run build` | build de produção |
 | `npm run typecheck` | TypeScript sem emitir |
 | `npm run lint` | ESLint |
+
+---
+
+## Migrações do banco
+
+O [`supabase/schema.sql`](supabase/schema.sql) cria o banco do zero. Num projeto que
+**já existe**, ele não acrescenta colunas novas — `create table if not exists` não
+altera tabela existente. Para isso há arquivos de migração, que se rodam uma vez no
+SQL Editor, na ordem:
+
+| Arquivo | O que acrescenta |
+| --- | --- |
+| [`supabase/realtime.sql`](supabase/realtime.sql) | põe `messages` na publicação do Realtime |
+| [`supabase/migracao-002-copy-e-espectadores.sql`](supabase/migracao-002-copy-e-espectadores.sql) | copy editável da landing e a curva de espectadores |
+
+Todas são seguras de rodar de novo. O código tolera a coluna ausente e cai no valor
+padrão, então a ordem entre deploy e migração não quebra o site — mas os campos novos
+só aparecem em `/admin` depois da migração.
 
 Ver também: [`DEPLOY.md`](DEPLOY.md) para a primeira subida e o roteiro de teste
 ponta a ponta, e [`supabase/schema.sql`](supabase/schema.sql) para o banco.

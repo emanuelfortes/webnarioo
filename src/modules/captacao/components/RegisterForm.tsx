@@ -8,7 +8,7 @@ const inputClass =
   'w-full rounded-[10px] border border-[#2a3348] bg-[#0d1322] px-3.5 py-3 text-base text-[#f9fafb] focus:border-transparent focus:outline focus:outline-2 focus:outline-[#e11d48]';
 const labelClass = 'mt-3.5 mb-1.5 block text-[.82rem] text-[#9ca3af]';
 
-function Botao() {
+function Botao({ label }: { label: string }) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -16,12 +16,17 @@ function Botao() {
       disabled={pending}
       className="mt-[22px] w-full rounded-[10px] bg-[#dc2626] py-4 text-[1.08rem] font-bold text-white transition hover:brightness-[1.12] disabled:cursor-wait disabled:opacity-60"
     >
-      {pending ? 'Reservando sua vaga…' : '🔴 Garantir minha vaga na próxima sessão'}
+      {pending ? 'Reservando sua vaga…' : label}
     </button>
   );
 }
 
-export function RegisterForm() {
+interface RegisterFormProps {
+  ctaLabel: string;
+  consentText: string;
+}
+
+export function RegisterForm({ ctaLabel, consentText }: RegisterFormProps) {
   const [estado, acao] = useActionState<EstadoCadastro, FormData>(cadastrar, {});
 
   return (
@@ -76,8 +81,13 @@ export function RegisterForm() {
           className="mt-0.5 h-4 w-4 flex-shrink-0 accent-[#dc2626]"
         />
         <span>
-          Autorizo a ACEV a usar meus dados para me dar acesso a esta sessão e entrar em contato
-          sobre os serviços apresentados. Posso pedir a exclusão a qualquer momento. Leia a{' '}
+          {consentText}{' '}
+          {/*
+            O link da política é acrescentado aqui, e não no texto configurável:
+            é exigência legal, e não pode sumir porque alguém reescreveu a frase
+            no painel.
+          */}
+          Leia a{' '}
           <a href="/privacidade" className="text-[#93c5fd] underline">
             política de privacidade
           </a>
@@ -85,7 +95,7 @@ export function RegisterForm() {
         </span>
       </label>
 
-      <Botao />
+      <Botao label={ctaLabel} />
 
       {estado.erro && (
         <p role="alert" className="mt-3 text-center text-[.85rem] text-[#fca5a5]">

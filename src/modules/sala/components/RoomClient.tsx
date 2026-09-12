@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MessageRow, Visitor, WebinarConfig } from '@/core/types';
 import { useSessionClock } from '../hooks/useSessionClock';
 import { usePresence } from '../hooks/usePresence';
+import { useFakeViewers } from '../hooks/useFakeViewers';
 import { useEventTracking } from '../hooks/useEventTracking';
 import { useChatMessages } from '../hooks/useChatMessages';
 import { RoomHeader } from './RoomHeader';
@@ -39,7 +40,13 @@ export function RoomClient({ sessionAt, cfg, eu, mensagensIniciais }: RoomClient
   const esteveAoVivoRef = useRef(false);
 
   const { phase, elapsedSec } = useSessionClock(sessionAt, cfg.duration_sec);
-  const viewers = usePresence(sessionAt, chaveDePresenca, eu.name);
+  // O contador exibido soma duas fontes: quem está mesmo na sala (Presence) e
+  // a curva configurada em /admin. Somar, e não substituir, mantém honesto o
+  // efeito de ver o número subir quando alguém de verdade entra.
+  const presencaReal = usePresence(sessionAt, chaveDePresenca, eu.name);
+  const daCurva = useFakeViewers(cfg.viewers_curve, sessionAt, elapsedSec);
+  const viewers = presencaReal + daCurva;
+
   const { track, trackMarcos } = useEventTracking(sessionAt, eu.leadId !== null);
   const chat = useChatMessages(sessionAt, mensagensIniciais);
 
@@ -100,12 +107,17 @@ export function RoomClient({ sessionAt, cfg, eu, mensagensIniciais }: RoomClient
           disparadasRef.current.add(i);
           chat.adicionarLocal({
             id: -(Date.now() * 100 + i),
+            // Carimbado com o relógio de quem assiste, não com o segundo do
+            // vídeo: é o que faz a fala parecer recém-escrita.
             created_at: new Date().toISOString(),
             session_at: sessionAt,
             lead_id: null,
-            name: m.name || 'Apresentador',
+            name: m.name || 'Participante',
             text: m.text,
-            is_host: true,
+            // Só quem foi marcado como apresentador ganha o destaque laranja.
+            // O resto entra como participante comum — que é o ponto: uma sala
+            // em que toda fala vem do palco não parece uma sala com gente.
+            is_host: m.host === true,
           });
         }
       });
@@ -219,11 +231,12 @@ export function RoomClient({ sessionAt, cfg, eu, mensagensIniciais }: RoomClient
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-black">
-      <RoomHeader title={cfg.title} viewers={viewers} live={phase === 'live'} />
+      <RoomHeader viewers={viewers} live={phase === 'live'} />
 
       <main className="flex min-h-0 flex-1 max-[860px]:flex-col max-[860px]:overflow-y-auto">
         <VideoPlayer
           videoRef={videoRef}
+          title={cfg.title}
           overlay={conteudoOverlay}
           onOverlayClick={clicarOverlay}
           clickable={overlay === 'som' || overlay === 'tocar'}
