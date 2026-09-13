@@ -7,6 +7,7 @@ import { salvarConfig, type EstadoConfig } from '../actions';
 import { paraMMSS } from '../tempo';
 import { MessagesEditor } from './MessagesEditor';
 import { ViewersEditor } from './ViewersEditor';
+import { VideoUploader } from './VideoUploader';
 
 const labelClass = 'mt-3.5 mb-1 block text-[.82rem] font-semibold text-[#6b7280]';
 const inputClass = 'w-full rounded-lg border border-[#d1d5db] px-3 py-2.5 text-[.95rem]';
@@ -97,6 +98,10 @@ export function ConfigTab({ cfg }: { cfg: WebinarConfig }) {
   const [duracao, setDuracao] = useState(String(cfg.duration_sec));
   const duracaoSeg = Number.parseInt(duracao, 10) || 0;
 
+  // A URL do vídeo é estado para o uploader poder preenchê-la — e continua
+  // editável à mão, que é como se aponta para o R2 quando o volume crescer.
+  const [videoUrl, setVideoUrl] = useState(cfg.video_url);
+
   return (
     <form action={acao}>
       {/* ---------------------------------------------------------------- */}
@@ -108,6 +113,14 @@ export function ConfigTab({ cfg }: { cfg: WebinarConfig }) {
           label="URL do vídeo (MP4)"
           padrao={cfg.video_url}
           placeholder="https://pub-xxxx.r2.dev/webinar.mp4"
+          value={videoUrl}
+          onChange={setVideoUrl}
+        />
+        <VideoUploader
+          onUploaded={({ url, duracaoSeg: d }) => {
+            setVideoUrl(url);
+            if (d > 0) setDuracao(String(d));
+          }}
         />
         <div className="grid grid-cols-3 gap-3.5 max-[640px]:grid-cols-1">
           <Campo
